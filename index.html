@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Accomplish</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        input, button {
+            font-size: 1.1em;
+            padding: 15px 25px;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        button {
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .player-list {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .player-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            min-width: 120px;
+            transition: transform 0.3s ease;
+        }
+
+        .player-card:hover {
+            transform: scale(1.05);
+        }
+
+        .player-card.clickable {
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .player-card.clickable:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .player-card.selected {
+            border-color: #ffeb3b;
+            background: rgba(255, 235, 59, 0.3);
+        }
+
+        .role-info {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #ffeb3b;
+        }
+
+        .secret-word {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffeb3b;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin: 20px 0;
+        }
+
+        .keywords-section {
+            margin: 30px 0;
+        }
+
+        .keyword-input {
+            width: 100%;
+            max-width: 300px;
+            margin: 10px 0;
+        }
+
+        .keywords-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .keyword-tag {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .scores {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .score-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 5px;
+            min-width: 100px;
+        }
+
+        .timer {
+            font-size: 1.5em;
+            margin: 20px 0;
+            color: #ffeb3b;
+        }
+
+        .game-code {
+            font-size: 1.3em;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            letter-spacing: 3px;
+            font-weight: bold;
+        }
+
+        .phase-indicator {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin: 20px 0;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .player-list {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 Secret Accomplish</h1>
+        
+        <!-- Home Screen -->
+        <div id="home" class="screen active">
+            <p style="margin-bottom: 30px; font-size: 1.2em;">A thrilling deduction game where secrets hide in plain sight!</p>
+            <button onclick="showCreateGame()">Create Game</button>
+            <button onclick="showJoinGame()">Join Game</button>
+        </div>
+
+        <!-- Create Game Screen -->
+        <div id="createGame" class="screen">
+            <h2>Create New Game</h2>
+            <input type="text" id="playerName" placeholder="Your Name" maxlength="20">
+            <br>
+            <button onclick="createGame()">Create Game</button>
+            <button onclick="showHome()">Back</button>
+        </div>
+
+        <!-- Join Game Screen -->
+        <div id="joinGame" class="screen">
+            <h2>Join Game</h2>
+            <input type="text" id="joinPlayerName" placeholder="Your Name" maxlength="20">
+            <input type="text" id="gameCode" placeholder="Game Code" maxlength="6">
+            <br>
+            <button onclick="joinGame()">Join Game</button>
+            <button onclick="showHome()">Back</button>
+        </div>
+
+        <!-- Lobby Screen -->
+        <div id="lobby" class="screen">
+            <h2>Game Lobby</h2>
+            <div class="game-code">Game Code: <span id="lobbyGameCode"></span></div>
+            <div class="player-list" id="playerList"></div>
+            <p>Waiting for players... (Need 4+ players to start)</p>
+            <button id="startGameBtn" onclick="startGame()" disabled>Start Game</button>
+            <button onclick="leaveGame()">Leave Game</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game" class="screen">
+            <div class="phase-indicator" id="phaseIndicator">Waiting...</div>
+            <div id="gameContent"></div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results" class="screen">
+            <h2>Round Results</h2>
+            <div id="resultsContent"></div>
+            <div class="scores" id="gameScores"></div>
+            <button id="nextRoundBtn" onclick="nextRound()">Next Round</button>
+            <button onclick="endGame()">End Game</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            gameCode: '',
+            playerName: '',
+            players: [],
+            currentRound: 1,
+            phase: 'lobby', // lobby, setup, keywords, voting, results
+            roles: {},
+            secretWord: '',
+            keywords: {},
+            votes: {},
+            scores: {},
+            isHost: false,
+            timer: 0,
+            currentPlayerIndex: 0
+        };
+
+        // Secret words pool
+        const secretWords = [
+            'OCEAN', 'MOUNTAIN', 'FOREST', 'DESERT', 'CITY', 'VILLAGE', 'CASTLE', 'BRIDGE',
+            'PIZZA', 'BURGER', 'SUSHI', 'PASTA', 'SALAD', 'COOKIE', 'CAKE', 'BREAD',
+            'GUITAR', 'PIANO', 'VIOLIN', 'DRUMS', 'FLUTE', 'TRUMPET', 'SAXOPHONE',
+            'SOCCER', 'TENNIS', 'BASKETBALL', 'SWIMMING', 'RUNNING', 'CYCLING', 'DANCING',
+            'BOOK', 'MOVIE', 'MUSIC', 'PAINTING', 'SCULPTURE', 'THEATER', 'MUSEUM',
+            'WINTER', 'SUMMER', 'SPRING', 'AUTUMN', 'RAIN', 'SNOW', 'SUNSHINE', 'WIND',
+            'CAR', 'TRAIN', 'AIRPLANE', 'BICYCLE', 'BOAT', 'MOTORCYCLE', 'HELICOPTER',
+            'COMPUTER', 'PHONE', 'CAMERA', 'TELEVISION', 'RADIO', 'CLOCK', 'LAMP'
+        ];
+
+        // Utility functions
+        function generateGameCode() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function showHome() {
+            showScreen('home');
+        }
+
+        function showCreateGame() {
+            showScreen('createGame');
+        }
+
+        function showJoinGame() {
+            showScreen('joinGame');
+        }
+
+        // Game creation and joining
+        function createGame() {
+            const playerName = document.getElementById('playerName').value.trim();
+            if (!playerName) {
+                alert('Please enter your name');
+                return;
+            }
+
+            gameState.gameCode = generateGameCode();
+            gameState.playerName = playerName;
+            gameState.players = [playerName];
+            gameState.isHost = true;
+            gameState.scores = { [playerName]: 0 };
+
+            showLobby();
+        }
+
+        function joinGame() {
+            const playerName = document.getElementById('joinPlayerName').value.trim();
+            const gameCode = document.getElementById('gameCode').value.trim().toUpperCase();
+            
+            if (!playerName || !gameCode) {
+                alert('Please enter your name and game code');
+                return;
+            }
+
+            // In a real implementation, this would connect to a server
+            // For demo purposes, we'll simulate joining
+            gameState.gameCode = gameCode;
+            gameState.playerName = playerName;
+            gameState.players = [playerName, 'Player 2', 'Player 3', 'Player 4']; // Simulated players
+            gameState.isHost = false;
+            gameState.scores = {};
+            gameState.players.forEach(player => {
+                gameState.scores[player] = 0;
+            });
+
+            showLobby();
+        }
+
+        function showLobby() {
+            document.getElementById('lobbyGameCode').textContent = gameState.gameCode;
+            updatePlayerList();
+            showScreen('lobby');
+        }
+
+        function updatePlayerList() {
+            const playerList = document.getElementById('playerList');
+            playerList.innerHTML = '';
+            
+            gameState.players.forEach(player => {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'player-card';
+                playerCard.innerHTML = `
+                    <div>${player}</div>
+                    <div style="font-size: 0.8em; opacity: 0.8;">Score: ${gameState.scores[player] || 0}</div>
+                `;
+                playerList.appendChild(playerCard);
+            });
+
+            const startBtn = document.getElementById('startGameBtn');
+            startBtn.disabled = gameState.players.length < 4 || !gameState.isHost;
+        }
+
+        function leaveGame() {
+            gameState = {
+                gameCode: '',
+                playerName: '',
+                players: [],
+                currentRound: 1,
+                phase: 'lobby',
+                roles: {},
+                secretWord: '',
+                keywords: {},
+                votes: {},
+                scores: {},
+                isHost: false,
+                timer: 0,
+                currentPlayerIndex: 0
+            };
+            showHome();
+        }
+
+        // Game logic
+        function startGame() {
+            gameState.phase = 'setup';
+            gameState.currentRound = 1;
+            startRound();
+        }
+
+        function startRound() {
+            // Assign roles randomly
+            const players = [...gameState.players];
+            const shuffled = players.sort(() => Math.random() - 0.5);
+            
+            gameState.roles = {
+                leader: shuffled[0],
+                accomplice: shuffled[1],
+                investigators: shuffled.slice(2)
+            };
+
+            // Pick random secret word
+            gameState.secretWord = secretWords[Math.floor(Math.random() * secretWords.length)];
+            
+            // Reset round data
+            gameState.keywords = {};
+            gameState.votes = {};
+            gameState.currentPlayerIndex = 0;
+
+            showGameScreen();
+            showRoleInfo();
+        }
+
+        function showGameScreen() {
+            showScreen('game');
+        }
+
+        function showRoleInfo() {
+            const content = document.getElementById('gameContent');
+            const phaseIndicator = document.getElementById('phaseIndicator');
+            
+            phaseIndicator.textContent = `Round ${gameState.currentRound} - Role Assignment`;
+            
+            let roleText = '';
+            let secretWordDisplay = '';
+            
+            if (gameState.roles.leader === gameState.playerName) {
+                roleText = '🎯 You are the LEADER';
+                secretWordDisplay = `<div class="secret-word">Secret Word: ${gameState.secretWord}</div>`;
+            } else if (gameState.roles.accomplice === gameState.playerName) {
+                roleText = '🕵️ You are the ACCOMPLICE';
+                secretWordDisplay = `<div class="secret-word">Secret Word: ${gameState.secretWord}</div>`;
+            } else {
+                roleText = '🔍 You are an INVESTIGATOR';
+                secretWordDisplay = '<div style="margin: 20px 0;">The secret word is hidden from you!</div>';
+            }
+
+            content.innerHTML = `
+                <div class="role-info">
+                    <h3>${roleText}</h3>
+                    ${secretWordDisplay}
+                    <p style="margin-top: 15px;">
+                        ${gameState.roles.leader === gameState.playerName ? 
+                            'Give the first keyword related to the secret word!' : 
+                            gameState.roles.accomplice === gameState.playerName ? 
+                            'You must blend in! Give keywords that seem natural but don\'t give away the secret.' :
+                            'Listen to the keywords and try to figure out the secret word and who the accomplice is!'
+                        }
+                    </p>
+                </div>
+                <button onclick="startKeywordPhase()">Ready to Start Keywords</button>
+            `;
+        }
+
+        function startKeywordPhase() {
+            gameState.phase = 'keywords';
+            gameState.currentPlayerIndex = 0;
+            
+            // Leader goes first
+            const leaderIndex = gameState.players.indexOf(gameState.roles.leader);
+            gameState.currentPlayerIndex = leaderIndex;
+            
+            showKeywordInput();
+        }
+
+        function showKeywordInput() {
+            const content = document.getElementById('gameContent');
+            const phaseIndicator = document.getElementById('phaseIndicator');
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            
+            phaseIndicator.textContent = `Round ${gameState.currentRound} - Keywords`;
+            
+            if (currentPlayer === gameState.playerName) {
+                content.innerHTML = `
+                    <h3>Your turn to give a keyword!</h3>
+                    <div class="keywords-section">
+                        <input type="text" id="keywordInput" class="keyword-input" placeholder="Enter your keyword" maxlength="20">
+                        <br>
+                        <button onclick="submitKeyword()">Submit Keyword</button>
+                    </div>
+                    ${getKeywordsDisplay()}
+                `;
+                
+                setTimeout(() => {
+                    document.getElementById('keywordInput').focus();
+                }, 100);
+            } else {
+                content.innerHTML = `
+                    <h3>Waiting for ${currentPlayer} to give a keyword...</h3>
+                    ${getKeywordsDisplay()}
+                `;
+                
+                // Simulate other players giving keywords
+                setTimeout(() => {
+                    const keywords = getSimulatedKeyword(currentPlayer);
+                    gameState.keywords[currentPlayer] = keywords;
+                    nextPlayer();
+                }, 2000 + Math.random() * 3000);
+            }
+        }
+
+        function getKeywordsDisplay() {
+            const keywordsList = Object.entries(gameState.keywords)
+                .map(([player, keyword]) => `<div class="keyword-tag"><strong>${player}:</strong> ${keyword}</div>`)
+                .join('');
+            
+            return `<div class="keywords-display">${keywordsList}</div>`;
+        }
+
+        function submitKeyword() {
+            const keyword = document.getElementById('keywordInput').value.trim();
+            if (!keyword) {
+                alert('Please enter a keyword');
+                return;
+            }
+
+            gameState.keywords[gameState.playerName] = keyword;
+            nextPlayer();
+        }
+
+        function nextPlayer() {
+            gameState.currentPlayerIndex++;
+            
+            if (gameState.currentPlayerIndex >= gameState.players.length) {
+                startVotingPhase();
+            } else {
+                showKeywordInput();
+            }
+        }
+
+        function getSimulatedKeyword(player) {
+            const word = gameState.secretWord.toLowerCase();
+            const relatedWords = {
+                'ocean': ['water', 'waves', 'blue', 'deep', 'fish', 'salt', 'vast'],
+                'mountain': ['high', 'peak', 'climb', 'rock', 'snow', 'tall', 'summit'],
+                'forest': ['trees', 'green', 'woods', 'animals', 'nature', 'leaves', 'wild'],
+                'pizza': ['cheese', 'Italian', 'slice', 'tomato', 'hot', 'round', 'food'],
+                'guitar': ['strings', 'music', 'play', 'sound', 'acoustic', 'chord', 'strum'],
+                'winter': ['cold', 'snow', 'ice', 'season', 'frost', 'freeze', 'white']
+            };
+
+            const defaultWords = ['thing', 'object', 'item', 'stuff', 'element', 'part', 'piece'];
+            const wordPool = relatedWords[word] || defaultWords;
+            
+            // Accomplice gives more specific keywords, investigators give vaguer ones
+            if (player === gameState.roles.accomplice) {
+                return wordPool[Math.floor(Math.random() * Math.min(3, wordPool.length))];
+            } else {
+                return wordPool[Math.floor(Math.random() * wordPool.length)];
+            }
+        }
+
+        function startVotingPhase() {
+            gameState.phase = 'voting';
+            showVotingScreen();
+        }
+
+        function showVotingScreen() {
+            const content = document.getElementById('gameContent');
+            const phaseIndicator = document.getElementById('phaseIndicator');
+            
+            phaseIndicator.textContent = `Round ${gameState.currentRound} - Voting`;
+            
+            const investigatorOptions = gameState.players.filter(p => p !== gameState.playerName);
+            
+            content.innerHTML = `
+                <h3>Who do you think is the Accomplice?</h3>
+                <div class="keywords-section">
+                    <h4>All Keywords:</h4>
+                    ${getKeywordsDisplay()}
+                </div>
+                <div class="player-list" id="votingList">
+                    ${investigatorOptions.map(player => 
+                        `<div class="player-card clickable" onclick="selectVote('${player}')" data-player="${player}">
+                            <div>${player}</div>
+                            <div style="font-size: 0.8em; opacity: 0.8;">${gameState.keywords[player] || 'No keyword'}</div>
+                        </div>`
+                    ).join('')}
+                </div>
+                <button id="submitVoteBtn" onclick="submitVote()" disabled>Submit Vote</button>
+            `;
+        }
+
+        let selectedVote = null;
+
+        function selectVote(player) {
+            selectedVote = player;
+            
+            // Update UI
+            document.querySelectorAll('.player-card.clickable').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            document.querySelector(`[data-player="${player}"]`).classList.add('selected');
+            document.getElementById('submitVoteBtn').disabled = false;
+        }
+
+        function submitVote() {
+            if (!selectedVote) return;
+            
+            gameState.votes[gameState.playerName] = selectedVote;
+            
+            // Simulate other players voting
+            gameState.players.forEach(player => {
+                if (player !== gameState.playerName && !gameState.votes[player]) {
+                    const suspects = gameState.players.filter(p => p !== player && p !== gameState.roles.leader);
+                    gameState.votes[player] = suspects[Math.floor(Math.random() * suspects.length)];
+                }
+            });
+            
+            calculateResults();
+        }
+
+        function calculateResults() {
+            const votes = Object.values(gameState.votes);
+            const accomplice = gameState.roles.accomplice;
+            const leader = gameState.roles.leader;
+            
+            // Count votes for accomplice
+            const correctVotes = votes.filter(vote => vote === accomplice).length;
+            const totalVotes = votes.length;
+            
+            // Calculate points
+            const roundScores = {};
+            
+            if (correctVotes > 1) {
+                // Multiple correct guesses - 1 point each
+                Object.entries(gameState.votes).forEach(([voter, vote]) => {
+                    if (vote === accomplice) {
+                        roundScores[voter] = 1;
+                    }
+                });
+            } else if (correctVotes === 1) {
+                // Only one correct guess - check if it's the leader
+                const correctVoter = Object.keys(gameState.votes).find(voter => gameState.votes[voter] === accomplice);
+                if (correctVoter === leader) {
+                    roundScores[leader] = 1;
+                    roundScores[accomplice] = 3;
+                } else {
+                    roundScores[correctVoter] = 1;
+                }
+            }
+            // If no correct guesses, no points awarded
+            
+            // Update total scores
+            Object.entries(roundScores).forEach(([player, points]) => {
+                gameState.scores[player] = (gameState.scores[player] || 0) + points;
+            });
+            
+            showResults(roundScores, correctVotes, totalVotes);
+        }
+
+        function showResults(roundScores, correctVotes, totalVotes) {
+            const content = document.getElementById('resultsContent');
+            const scores = document.getElementById('gameScores');
+            
+            content.innerHTML = `
+                <div class="role-info">
+                    <h3>The Secret Word was: <span class="secret-word">${gameState.secretWord}</span></h3>
+                    <p><strong>Leader:</strong> ${gameState.roles.leader}</p>
+                    <p><strong>Accomplice:</strong> ${gameState.roles.accomplice}</p>
+                    <p><strong>Investigators:</strong> ${gameState.roles.investigators.join(', ')}</p>
+                </div>
+                
+                <div class="keywords-section">
+                    <h4>All Keywords:</h4>
+                    ${getKeywordsDisplay()}
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <h4>Voting Results:</h4>
+                    <p>${correctVotes} out of ${totalVotes} players correctly identified the accomplice</p>
+                    ${Object.entries(gameState.votes).map(([voter, vote]) => 
+                        `<div>${voter} voted for ${vote} ${vote === gameState.roles.accomplice ? '✓' : '✗'}</div>`
+                    ).join('')}
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <h4>Points This Round:</h4>
+                    ${Object.entries(roundScores).length > 0 ? 
+                        Object.entries(roundScores).map(([player, points]) => 
+                            `<div>${player}: +${points} points</div>`
+                        ).join('') : 
+                        '<div>No points awarded this round</div>'
+                    }
+                </div>
+            `;
+            
+            // Update score display
+            scores.innerHTML = gameState.players.map(player => 
+                `<div class="score-card">
+                    <div>${player}</div>
+                    <div style="font-size: 1.2em; font-weight: bold;">${gameState.scores[player] || 0}</div>
+                </div>`
+            ).join('');
+            
+            showScreen('results');
+        }
+
+        function nextRound() {
+            gameState.currentRound++;
+            startRound();
+        }
+
+        function endGame() {
+            // Show final scores
+            const winner = gameState.players.reduce((a, b) => 
+                (gameState.scores[a] || 0) > (gameState.scores[b] || 0) ? a : b
+            );
+            
+            alert(`Game Over! Winner: ${winner} with ${gameState.scores[winner]} points!`);
+            leaveGame();
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add enter key support for inputs
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const activeScreen = document.querySelector('.screen.active');
+                    if (activeScreen.id === 'createGame') {
+                        createGame();
+                    } else if (activeScreen.id === 'joinGame') {
+                        joinGame();
+                    } else if (activeScreen.id === 'game' && document.getElementById('keywordInput')) {
+                        submitKeyword();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
